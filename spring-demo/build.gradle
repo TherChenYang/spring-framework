@@ -1,0 +1,40 @@
+plugins {
+    id("java")
+}
+
+group = "com.yang"
+version = "5.3.29-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation(platform("org.junit:junit-bom:5.9.1"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+	implementation(project(":spring-beans"))
+	implementation(project(":spring-core"))
+	implementation(project(":spring-context"))
+	implementation(project(":spring-webmvc"))
+	implementation(project(":spring-jdbc"))
+	implementation(project(":spring-orm"))
+	implementation(project(":spring-tx"))
+	implementation(project(":spring-web"))
+	implementation(project(":spring-context-indexer"))
+	implementation(project(":spring-context-support"))
+	implementation(project(":spring-expression"))
+	implementation(project(":spring-instrument"))
+	implementation(project(":spring-jcl"))
+	implementation(project(":spring-jms"))
+	implementation(project(":spring-messaging"))
+	implementation(project(":spring-oxm"))
+	implementation(project(":spring-test"))
+	implementation(project(":spring-webflux"))
+	implementation(project(":spring-websocket"))
+	implementation("org.aspectj:aspectjweaver:1.9.6")
+	implementation(project(":spring-aop"))
+}
+
+tasks.test {
+    useJUnitPlatform()
+}

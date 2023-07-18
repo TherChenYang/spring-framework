@@ -66,6 +66,9 @@ public class StandardEnvironment extends AbstractEnvironment {
 	 * {@link MutablePropertySources} instance.
 	 */
 	public StandardEnvironment() {
+		// 子类在初始化之前会首先初始化父类
+		// 在AbstractEnvironment中调用了子类StandardEnvironment实现的customizePropertySources方法
+		// 完成了环境资源变量的添加
 	}
 
 	/**
