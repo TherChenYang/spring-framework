@@ -103,6 +103,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		this();
 		scan(basePackages);
 		refresh();
+		System.out.println("tedst");
 	}
 
 

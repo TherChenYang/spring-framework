@@ -203,6 +203,20 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private final ResourceLoader resourceLoader;
 
+	/**
+	 * Ant风格表达式
+	 * 通配符：
+	 * 	*：匹配任意字符序列（包括空字符序列）
+	 * 	?：匹配任意单个字符
+	 * 特殊语法：
+	 * /：用于分隔路径层级
+	 * **：匹配任意路径层级，包括子目录
+	 * {}：用于指定多个选项，用逗号分隔
+	 * 示例：
+	 * *.txt：匹配以.txt结尾的文件名
+	 * abc?def：匹配以abc开头，后跟任意单个字符，然后是def的字符串
+	 * dir\/**\/*.java：匹配dir目录及其子目录下的所有.java文件
+	 */
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
 

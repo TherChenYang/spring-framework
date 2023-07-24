@@ -1,7 +1,9 @@
 package com.yang;
 
+import com.chen.ImportConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author: CY.Ma
@@ -10,5 +12,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ComponentScan(basePackages = {"com.yang"})
+@Import({ImportConfiguration.class})
 public class SpringConfiguration {
 }
