@@ -3,6 +3,7 @@ package com.yang;
 import com.chen.ImportConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -11,7 +12,9 @@ import org.springframework.context.annotation.Import;
  * @description:
  */
 @Configuration
-@ComponentScan(basePackages = {"com.yang"})
+@ComponentScan(basePackages = {"com.yang"}
+//		, includeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = DistrictTypeFilter.class)
+)
 @Import({ImportConfiguration.class})
 public class SpringConfiguration {
 }

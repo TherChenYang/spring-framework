@@ -1,5 +1,6 @@
 package com.yang.domain;
 
+import org.springframework.stereotype.Indexed;
 import org.springframework.stereotype.Service;
 
 /**
@@ -8,5 +9,6 @@ import org.springframework.stereotype.Service;
  * @description:
  */
 @Service
+@Indexed
 public class UserService {
 }

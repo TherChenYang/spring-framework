@@ -385,6 +385,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				if (stereotype == null) {
 					throw new IllegalArgumentException("Failed to extract stereotype from " + filter);
 				}
+				// 此时IndexCache中key为@stereotype(spring相关注解类), value为bean真实路径
+				// 从Index缓存中取key为stereotype,且value满足basePackage路径的所有类
 				types.addAll(index.getCandidateTypes(basePackage, stereotype));
 			}
 			boolean traceEnabled = logger.isTraceEnabled();
