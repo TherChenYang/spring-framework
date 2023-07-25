@@ -146,6 +146,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 
 		preProcessXml(root);
+		// 解析bean定义信息
 		parseBeanDefinitions(root, this.delegate);
 		postProcessXml(root);
 
@@ -172,9 +173,11 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				Node node = nl.item(i);
 				if (node instanceof Element) {
 					Element ele = (Element) node;
+					// 判断是否为spring默认的命名空间(spring原生的标签)
 					if (delegate.isDefaultNamespace(ele)) {
 						parseDefaultElement(ele, delegate);
 					}
+					// 非默认命名空间，例如aop,事务(非import，alias，bean, beans标签)
 					else {
 						delegate.parseCustomElement(ele);
 					}
@@ -299,10 +302,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	}
 
 	/**
+	 * 解析bean标签，将bean的定义信息注册到bean容器
 	 * Process the given bean element, parsing the bean definition
 	 * and registering it with the registry.
 	 */
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
+		// BeanDefinitionHolder是对BeanDefinition的封装，包含了BeanDefinition和beanName
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);

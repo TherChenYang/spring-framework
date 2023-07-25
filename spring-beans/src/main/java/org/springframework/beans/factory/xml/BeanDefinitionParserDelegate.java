@@ -412,10 +412,13 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, @Nullable BeanDefinition containingBean) {
+		// 解析id标签
 		String id = ele.getAttribute(ID_ATTRIBUTE);
+		// 解析name标签
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
 		List<String> aliases = new ArrayList<>();
+		// 检查是否有别名，如果有，添加到别名集合中
 		if (StringUtils.hasLength(nameAttr)) {
 			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			aliases.addAll(Arrays.asList(nameArr));
@@ -431,9 +434,11 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		if (containingBean == null) {
+			// 检查名称是否唯一
 			checkNameUniqueness(beanName, aliases, ele);
 		}
 
+		// 对bean标签进行详细解析
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
 			if (!StringUtils.hasText(beanName)) {
@@ -503,26 +508,37 @@ public class BeanDefinitionParserDelegate {
 		this.parseState.push(new BeanEntry(beanName));
 
 		String className = null;
+		// 解析class标签(有classname已经可以实例化了)
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 			className = ele.getAttribute(CLASS_ATTRIBUTE).trim();
 		}
 		String parent = null;
+		// 解析parent标签
 		if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
 			parent = ele.getAttribute(PARENT_ATTRIBUTE);
 		}
 
 		try {
+			// 创建BeanDefinition，封装class属性
 			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
-
+			// 构建BeanDefinition的其他相关属性
 			parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
+			// 设置BeanDefinition的描述信息
 			bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
 
+			// 解析meta标签，设置元数据信息
+			// 元数据是关于 bean 的描述性信息，可以帮助解释和配置 bean 的行为
 			parseMetaElements(ele, bd);
+			// 解析lookup-method标签，父类为抽象方法，使用lookup-method动态替换抽象方法为子类的方法
 			parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
+			// 解析replaced-method标签，父类为已有方法，使用replaced-method动态替换已有方法为子类的方法
 			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
 
+			// 解析构造函数参数
 			parseConstructorArgElements(ele, bd);
+			// 解析property标签，设置属性值
 			parsePropertyElements(ele, bd);
+			// 解析qualifier标签，设置自动注入的限定符
 			parseQualifierElements(ele, bd);
 
 			bd.setResource(this.readerContext.getResource());

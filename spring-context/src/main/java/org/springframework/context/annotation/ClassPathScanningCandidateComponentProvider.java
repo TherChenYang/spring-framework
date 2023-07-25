@@ -204,8 +204,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
+		// 添加Component过滤规则
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
+		// considerMetaAnnotation默认为true，指是支持此注解作为元注解
+		// 当开启时，将此注解作为元注解加到其他注解上，那么其他注解注解的类也会被扫描
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
 					((Class<? extends Annotation>) ClassUtils.forName("javax.annotation.ManagedBean", cl)), false));
@@ -262,8 +265,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	@Override
 	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
+		// 设置资源处理器
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
+		// 从META-INF/spring.components加载索引，使用了@Indexed注解会在编译的时候生成spring.components
+		// 启动时直接注入spring.components中的bean，不需要再进行扫描动作
 		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(this.resourcePatternResolver.getClassLoader());
 	}
 

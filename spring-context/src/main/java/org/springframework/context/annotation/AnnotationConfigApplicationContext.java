@@ -66,8 +66,13 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 */
 	public AnnotationConfigApplicationContext() {
 		StartupStep createAnnotatedBeanDefReader = this.getApplicationStartup().start("spring.context.annotated-bean-reader.create");
+		// 1.初始化conditionEvaluator,registry(本身)
+		// 2.注册初始的BeanFactoryPostProcessor和BeanPostProcessor
 		this.reader = new AnnotatedBeanDefinitionReader(this);
 		createAnnotatedBeanDefReader.end();
+		// 1.根据useDefaultFilters的值添加默认过滤器TypeFilter(@Component-支持注解与元注解)
+		// 2.设置Environment对象
+		// 3.设置Resource对象，处理spring.components加载进缓存
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -103,7 +108,6 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		this();
 		scan(basePackages);
 		refresh();
-		System.out.println("tedst");
 	}
 
 
