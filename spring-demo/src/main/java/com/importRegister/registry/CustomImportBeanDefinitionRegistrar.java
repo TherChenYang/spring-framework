@@ -9,6 +9,7 @@ import org.springframework.core.type.filter.AspectJTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 
 /**
+ * 扫包能扫到 domain下的User类
  * @author: CY.Ma
  * @date: 2023/8/17 11:00
  * @description:

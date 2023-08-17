@@ -2,7 +2,8 @@ package com.yang;
 
 import com.importRegister.config.SpringConfiguration;
 import com.importRegister.domain.User;
-import com.importRegister.domain.UserImported;
+import com.importRegister.im.UserImported;
+import com.importRegister.sel.CustomClass;
 import com.yang.domain.Person;
 import com.yang.domain.UserService;
 import com.yang.factory.CustomXmlApplicationContext;
@@ -47,14 +48,22 @@ public class SpringTest {
 		System.out.println(person);
 	}
 
+	/**
+	 * 测试@Import注解中Registar中导入的类，又有@Import注解导入别的类
+	 */
 	@Test
 	public void test05() {
 		ApplicationContext ac = new AnnotationConfigApplicationContext(SpringConfiguration.class);
-		User user = ac.getBean("user", com.importRegister.domain.User.class);
-		UserImported userImported = ac.getBean("userImported", UserImported.class);
+		for (String beanDefinitionName : ac.getBeanDefinitionNames()) {
+			System.out.println(beanDefinitionName);
+		}
+		User user = ac.getBean("user", User.class);
+		UserImported userImported = ac.getBean(UserImported.class);
+		CustomClass bean = ac.getBean(CustomClass.class);
 
 		System.out.println(user);
 		System.out.println(userImported);
+		System.out.println(bean);
 	}
 
 

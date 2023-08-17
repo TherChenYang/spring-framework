@@ -354,12 +354,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
 			// 经过上面的parse后，相当于把一个类中的@Import注解，@Bean注解解析成configClass中个各个属性
-			// 这里就是根据各个属性加载对应的beanDefinitions
+			// 这里就是根据各个属性加载对应的beanDefinitions(比如执行BeanDefinitionRegistrar的registerBeanDefinitions方法)
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 			processConfig.tag("classCount", () -> String.valueOf(configClasses.size())).end();
 
 			candidates.clear();
+			// 容器中的bean有变化，表示容器内生成了新的BeanDefinition
 			if (registry.getBeanDefinitionCount() > candidateNames.length) {
 				String[] newCandidateNames = registry.getBeanDefinitionNames();
 				Set<String> oldCandidateNames = new HashSet<>(Arrays.asList(candidateNames));
@@ -370,6 +371,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				for (String candidateName : newCandidateNames) {
 					if (!oldCandidateNames.contains(candidateName)) {
 						BeanDefinition bd = registry.getBeanDefinition(candidateName);
+						// 表示生成的beanDefinition既符合candidate规则，有没有并处理过(此时会捞出所有已经在beanDefinitionMap中的且没有被解析过的配置bean)
+						// 将此beanDefinition加入到candidates集合，并进行处理
 						if (ConfigurationClassUtils.checkConfigurationClassCandidate(bd, this.metadataReaderFactory) &&
 								!alreadyParsedClasses.contains(bd.getBeanClassName())) {
 							candidates.add(new BeanDefinitionHolder(bd, candidateName));
@@ -379,6 +382,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				candidateNames = newCandidateNames;
 			}
 		}
+		// 此处while循环就是为了处理@Bean,@Import等等注解导入的类定义，这些导入的类定义也需要重新走一遍处理过程
 		while (!candidates.isEmpty());
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes

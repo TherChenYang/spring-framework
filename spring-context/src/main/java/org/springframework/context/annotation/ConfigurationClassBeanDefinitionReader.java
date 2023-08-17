@@ -146,14 +146,16 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
-		if (configClass.isImported()) {
+		if (configClass.isImported()) { // 普通的被Import的类直接registerBeanDefinition
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
+		// 处理@Bean注解，生成对应的BeanDefinition
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		// 执行ImportBeanDefinitionRegistrar的registerBeanDefinitions方法
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 

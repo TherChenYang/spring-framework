@@ -253,7 +253,7 @@ class ConfigurationClassParser {
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
 		}
 		while (sourceClass != null);
-
+		// 所有处理过的configurationClass都会放进这个map中(核心，加载到此map表示注解已处理完毕)
 		this.configurationClasses.put(configClass, configClass);
 	}
 
@@ -310,7 +310,7 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// Process any @Import annotations 处理@Import注解
+		// Process any @Import annotations 处理@Import注解(!核心)
 		processImports(configClass, sourceClass, getImports(sourceClass), filter, true);
 
 		// Process any @ImportResource annotations 处理@ImportSource注解
@@ -584,12 +584,14 @@ class ConfigurationClassParser {
 						if (selectorFilter != null) {
 							exclusionFilter = exclusionFilter.or(selectorFilter);
 						}
-						if (selector instanceof DeferredImportSelector) {
+						if (selector instanceof DeferredImportSelector) { // 判断是否延迟加载
 							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
 						}
 						else {
+							// 非延迟加载，调用selectImports方法，获取类名称
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames, exclusionFilter);
+							// 递归处理从selectImports方法中获取的类，如果类是普通类，递归会走到第三个else中，最终会将类加入到configurationClasses map 中
 							processImports(configClass, currentSourceClass, importSourceClasses, exclusionFilter, false);
 						}
 					}
@@ -601,7 +603,7 @@ class ConfigurationClassParser {
 						ImportBeanDefinitionRegistrar registrar =
 								ParserStrategyUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class,
 										this.environment, this.resourceLoader, this.registry);
-						// 将ImportBeanDefinitionRegistrar加入到被解析的configClass的RegistrarList中
+						// 将ImportBeanDefinitionRegistrar加入到被解析的configClass的RegistrarList中(后续会遍历RegistrarList执行方法)
 						configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
 					}
 					else {
@@ -609,7 +611,7 @@ class ConfigurationClassParser {
 						// process it as an @Configuration class
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
-						// 递归process，@Import导入的类还需要解析
+						// 如果通过@Import导入的类是一个普通的类(非selector与registrar)，直接递归解析调用processConfigurationClass添加到configurationClasses
 						processConfigurationClass(candidate.asConfigClass(configClass), exclusionFilter);
 					}
 				}
