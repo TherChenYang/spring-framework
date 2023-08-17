@@ -215,6 +215,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			logger.trace("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
+			System.out.println("");
 			// JSR-250 1.1 API (as included in Java EE 6) not available - simply skip.
 		}
 		try {
@@ -316,9 +317,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	public Set<BeanDefinition> findCandidateComponents(String basePackage) {
 		if (this.componentsIndex != null && indexSupportsIncludeFilters()) {
+			// 从@Index注解生成的spring.components缓存中加载
 			return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
 		}
 		else {
+			// 没有生成spring.components类，直接扫描
 			return scanCandidateComponents(basePackage);
 		}
 	}

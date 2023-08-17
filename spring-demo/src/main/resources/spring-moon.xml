@@ -4,4 +4,18 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="userService" class="com.yang.domain.UserService"/>
+
+	<bean id="person" class="com.yang.domain.Person">
+		<property name="name" value="yang"/>
+		<property name="age" value="18"/>
+		<property name="address" value="山西省,太原市,万柏林区"/>
+	</bean>
+	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+		<property name="propertyEditorRegistrars">
+			<list>
+				<bean class="com.yang.extern.AddressPropertyEditorRegistrar"/>
+			</list>
+		</property>
+	</bean>
+	<bean class="com.yang.extern.factory.MyBeanFactoryPostProcessor"/>
 </beans>

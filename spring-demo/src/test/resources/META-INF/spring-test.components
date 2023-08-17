@@ -1,0 +1,4 @@
+com.yang.domain.UserService=org.springframework.stereotype.Component,com.yang.domain.UserService
+com.yang.SpringConfiguration=org.springframework.stereotype.Component
+com.yang.domain.MyComponentScan=org.springframework.stereotype.Component
+com.yang.domain.MyBean=org.springframework.stereotype.Component,com.yang.domain.MyBean

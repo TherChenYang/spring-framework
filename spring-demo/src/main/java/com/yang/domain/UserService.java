@@ -9,6 +9,5 @@ import org.springframework.stereotype.Service;
  * @description:
  */
 @Service
-@Indexed
 public class UserService {
 }

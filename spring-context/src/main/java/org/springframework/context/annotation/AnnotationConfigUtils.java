@@ -161,7 +161,7 @@ public abstract class AnnotationConfigUtils {
 
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
 
-		// 内部管理Configuration注解处理器
+		// 将ConfigurationClassPostProcessor加载到容器中，后面用来解析注解，核心中的核心(本质上是BeanFactoryPostProcessor和BeanDefinitionRegistryPostProcessor)
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);

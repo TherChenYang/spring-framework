@@ -51,8 +51,10 @@ import org.springframework.stereotype.Component;
  */
 abstract class ConfigurationClassUtils {
 
+	// 如果被@Configuration注解标注的类，将属性值标注为full
 	public static final String CONFIGURATION_CLASS_FULL = "full";
 
+	// 如果非@Configuration标注的类，属性值置为lite
 	public static final String CONFIGURATION_CLASS_LITE = "lite";
 
 	public static final String CONFIGURATION_CLASS_ATTRIBUTE =
@@ -90,6 +92,7 @@ abstract class ConfigurationClassUtils {
 			return false;
 		}
 
+		// 获取注解元数据
 		AnnotationMetadata metadata;
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
@@ -100,6 +103,7 @@ abstract class ConfigurationClassUtils {
 			// Check already loaded Class if present...
 			// since we possibly can't even load the class file for this Class.
 			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
+			// 如果实现了以下几个接口，则不处理，直接返回false
 			if (BeanFactoryPostProcessor.class.isAssignableFrom(beanClass) ||
 					BeanPostProcessor.class.isAssignableFrom(beanClass) ||
 					AopInfrastructureBean.class.isAssignableFrom(beanClass) ||
@@ -122,10 +126,12 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
+		// 是否包含@Configuration注解
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
+		// 是否是Configuration候选者，即@Component,@ComponentScan,@Import,@ImportResource,存在@Bean修饰的方法
 		else if (config != null || isConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
@@ -155,6 +161,7 @@ abstract class ConfigurationClassUtils {
 			return false;
 		}
 
+		// candidateIndicators包含四个候选注解
 		// Any of the typical annotations found?
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
@@ -163,6 +170,7 @@ abstract class ConfigurationClassUtils {
 		}
 
 		// Finally, let's look for @Bean methods...
+		// 最后判断是否存在被@Bean注解修饰的方法
 		return hasBeanMethods(metadata);
 	}
 
