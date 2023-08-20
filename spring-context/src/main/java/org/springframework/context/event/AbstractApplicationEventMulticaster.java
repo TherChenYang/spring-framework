@@ -203,6 +203,7 @@ public abstract class AbstractApplicationEventMulticaster
 							(sourceType == null || ClassUtils.isCacheSafe(sourceType, this.beanClassLoader)))) {
 				newRetriever = new CachedListenerRetriever();
 				existingRetriever = this.retrieverCache.putIfAbsent(cacheKey, newRetriever);
+				// 缓存里有数据，不需要在传递新的Retriever
 				if (existingRetriever != null) {
 					newRetriever = null;  // no need to populate it in retrieveApplicationListeners
 				}
@@ -210,6 +211,7 @@ public abstract class AbstractApplicationEventMulticaster
 		}
 
 		if (existingRetriever != null) {
+			// 直接从缓存中的Retriever获取监听器
 			Collection<ApplicationListener<?>> result = existingRetriever.getApplicationListeners();
 			if (result != null) {
 				return result;
@@ -245,6 +247,7 @@ public abstract class AbstractApplicationEventMulticaster
 		// Add programmatically registered listeners, including ones coming
 		// from ApplicationListenerDetector (singleton beans and inner beans).
 		for (ApplicationListener<?> listener : listeners) {
+			// 循环遍历监听器，判断是否能处理当前事件
 			if (supportsEvent(listener, eventType, sourceType)) {
 				if (retriever != null) {
 					filteredListeners.add(listener);
@@ -259,6 +262,7 @@ public abstract class AbstractApplicationEventMulticaster
 			ConfigurableBeanFactory beanFactory = getBeanFactory();
 			for (String listenerBeanName : listenerBeans) {
 				try {
+					// 遍历beanNameList判断是否能处理当前事件
 					if (supportsEvent(beanFactory, listenerBeanName, eventType)) {
 						ApplicationListener<?> listener =
 								beanFactory.getBean(listenerBeanName, ApplicationListener.class);
@@ -294,6 +298,7 @@ public abstract class AbstractApplicationEventMulticaster
 
 		AnnotationAwareOrderComparator.sort(allListeners);
 		if (retriever != null) {
+			// 在Cache中添加对应可以处理当前事件的监听器,下次的时候直接在外层循环中获取
 			if (filteredListenerBeans.isEmpty()) {
 				retriever.applicationListeners = new LinkedHashSet<>(allListeners);
 				retriever.applicationListenerBeans = filteredListenerBeans;
@@ -485,8 +490,10 @@ public abstract class AbstractApplicationEventMulticaster
 	 */
 	private class DefaultListenerRetriever {
 
+		// 存放事件监听器，有序，不可重复
 		public final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 
+		// 存放事件监听器名称，有序，不可重复
 		public final Set<String> applicationListenerBeans = new LinkedHashSet<>();
 
 		public Collection<ApplicationListener<?>> getApplicationListeners() {

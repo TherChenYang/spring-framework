@@ -189,6 +189,7 @@ class ConfigurationClassParser {
 			}
 		}
 
+		// 处理延迟处理的实现了DeferredImportSelector接口的Selector
 		this.deferredImportSelectorHandler.process();
 	}
 

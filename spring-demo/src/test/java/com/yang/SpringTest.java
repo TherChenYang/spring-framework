@@ -4,6 +4,8 @@ import com.importRegister.config.SpringConfiguration;
 import com.importRegister.domain.User;
 import com.importRegister.im.UserImported;
 import com.importRegister.sel.CustomClass;
+import com.sub.event.CustomEvent;
+import com.sub.source.CustomEventSource;
 import com.yang.domain.Person;
 import com.yang.domain.UserService;
 import com.yang.factory.CustomXmlApplicationContext;
@@ -66,5 +68,16 @@ public class SpringTest {
 		System.out.println(bean);
 	}
 
+	/**
+	 * 测试事件订阅与发布
+	 */
+	@Test
+	public void test06() {
+		ApplicationContext ac = new AnnotationConfigApplicationContext("com.sub");
+		CustomEventSource eventSource = ac.getBean(CustomEventSource.class);
+
+		CustomEvent event = new CustomEvent(this, "测试Message");
+		eventSource.publish(event);
+	}
 
 }
