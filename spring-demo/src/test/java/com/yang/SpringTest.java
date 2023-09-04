@@ -1,5 +1,9 @@
 package com.yang;
 
+import com.common.Account;
+import com.construct.Report;
+import com.factoryBean.CustomFactoryBean;
+import com.factoryBean.CustomSmartFactoryBean;
 import com.importRegister.config.SpringConfiguration;
 import com.importRegister.domain.User;
 import com.importRegister.im.UserImported;
@@ -79,5 +83,49 @@ public class SpringTest {
 		CustomEvent event = new CustomEvent(this, "测试Message");
 		eventSource.publish(event);
 	}
+
+	/**
+	 * 测试FactoryBean接口
+	 */
+	@Test
+	public void test07() {
+		ApplicationContext ac = new AnnotationConfigApplicationContext("com.factoryBean");
+
+		Account user = (Account) ac.getBean("customFactoryBean");
+		System.out.println("-----------------------");
+		System.out.println(user);
+		System.out.println(user.getName());
+
+		Account user1 = (Account) ac.getBean("customFactoryBean");
+		System.out.println("-----------------------");
+		System.out.println(user1);
+		System.out.println(user1.getName());
+
+
+		com.common.Person person = (com.common.Person) ac.getBean("customSmartFactoryBean");
+		CustomSmartFactoryBean customSmartFactoryBean = (CustomSmartFactoryBean) ac.getBean("&customSmartFactoryBean");
+		System.out.println(person);
+		System.out.println(customSmartFactoryBean);
+
+	}
+
+	/**
+	 * 测试InstantiationAwareBeanPostProcessor
+	 */
+	@Test
+	public void test08() {
+		ApplicationContext ac = new AnnotationConfigApplicationContext("com.instantiationAware");
+
+		Account account = (Account) ac.getBean("user");
+		System.out.println(account);
+	}
+
+	@Test
+	public void test09() {
+		ApplicationContext ac = new AnnotationConfigApplicationContext("com.construct");
+		Report bean = ac.getBean(Report.class);
+		System.out.println(bean);
+	}
+
 
 }

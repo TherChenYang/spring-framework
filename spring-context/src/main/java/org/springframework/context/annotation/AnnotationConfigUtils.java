@@ -163,6 +163,8 @@ public abstract class AnnotationConfigUtils {
 
 		// 将ConfigurationClassPostProcessor加载到容器中，后面用来解析注解，核心中的核心(本质上是BeanFactoryPostProcessor和BeanDefinitionRegistryPostProcessor)
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			// 根据Class对象创建RootBeanDefinition的时候没有任何操作
+			// 就是new了RootBeanDefinition，调用setBeanClass
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
