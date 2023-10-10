@@ -124,7 +124,7 @@ class ConstructorResolver {
 	 * or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
-	public BeanWrapper  autowireConstructor(String beanName, RootBeanDefinition mbd,
+	public BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd,
 			@Nullable Constructor<?>[] chosenCtors, @Nullable Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
@@ -199,7 +199,9 @@ class ConstructorResolver {
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 			}
 
+			// 先根据访问权限，再根据参数个数排序
 			AutowireUtils.sortConstructors(candidates);
+			// 定义差异变量，变量大小决定构造函数是否能被使用
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Constructor<?>> ambiguousConstructors = null;
 			Deque<UnsatisfiedDependencyException> causes = null;
@@ -288,6 +290,7 @@ class ConstructorResolver {
 						ambiguousConstructors);
 			}
 
+			// 如果已经找到对应的构造器，将构造器放入到缓存中
 			if (explicitArgs == null && argsHolderToUse != null) {
 				argsHolderToUse.storeCache(mbd, constructorToUse);
 			}

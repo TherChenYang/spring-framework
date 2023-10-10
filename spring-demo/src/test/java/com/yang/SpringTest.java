@@ -8,6 +8,7 @@ import com.importRegister.config.SpringConfiguration;
 import com.importRegister.domain.User;
 import com.importRegister.im.UserImported;
 import com.importRegister.sel.CustomClass;
+import com.simple.SimperUser;
 import com.sub.event.CustomEvent;
 import com.sub.source.CustomEventSource;
 import com.yang.domain.Person;
@@ -125,6 +126,13 @@ public class SpringTest {
 		ApplicationContext ac = new AnnotationConfigApplicationContext("com.construct");
 		Report bean = ac.getBean(Report.class);
 		System.out.println(bean);
+	}
+
+	@Test
+	public void test10() {
+		ApplicationContext ac = new AnnotationConfigApplicationContext("com.simple");
+		SimperUser bean = ac.getBean(SimperUser.class);
+		bean.test();
 	}
 
 
