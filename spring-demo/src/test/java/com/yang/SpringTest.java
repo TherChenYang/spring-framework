@@ -8,6 +8,7 @@ import com.importRegister.config.SpringConfiguration;
 import com.importRegister.domain.User;
 import com.importRegister.im.UserImported;
 import com.importRegister.sel.CustomClass;
+import com.simple.Job;
 import com.simple.SimperUser;
 import com.sub.event.CustomEvent;
 import com.sub.source.CustomEventSource;
@@ -128,6 +129,9 @@ public class SpringTest {
 		System.out.println(bean);
 	}
 
+	/**
+	 * 测试循环依赖
+	 */
 	@Test
 	public void test10() {
 		ApplicationContext ac = new AnnotationConfigApplicationContext("com.simple");
@@ -135,5 +139,14 @@ public class SpringTest {
 		bean.test();
 	}
 
+	/**
+	 * 测试通过Class获取bean，容器中有多个bean的情况
+	 */
+	@Test
+	public void test11() {
+		ApplicationContext ac = new AnnotationConfigApplicationContext("com.noUnique");
+		Object job = ac.getBean(Job.class);
+		System.out.println(job);
+	}
 
 }

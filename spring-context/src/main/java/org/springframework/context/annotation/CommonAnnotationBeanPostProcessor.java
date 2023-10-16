@@ -159,6 +159,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private static final Class<? extends Annotation> ejbClass;
 
 	static {
+		// 添加@Resource注解
 		resourceAnnotationTypes.add(Resource.class);
 
 		webServiceRefClass = loadAnnotationType("javax.xml.ws.WebServiceRef");
@@ -302,8 +303,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		// 处理PostConstruct注解和PreDestroy注解
 		super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
+		// 处理@Resource注解
 		InjectionMetadata metadata = findResourceMetadata(beanName, beanType, null);
+		// 将方法注册进入BeanDefinition
 		metadata.checkConfigMembers(beanDefinition);
 	}
 
@@ -324,9 +328,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	@Override
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+		// 从缓存中获取InjectionMetadata元数据信息
 		InjectionMetadata metadata = findResourceMetadata(beanName, bean.getClass(), pvs);
 		try {
-			metadata.inject(bean, beanName, pvs);
+			metadata.inject(bean, beanName, pvs); // 处理@Resource的注入
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "Injection of resource dependencies failed", ex);
@@ -364,6 +369,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	private InjectionMetadata buildResourceMetadata(Class<?> clazz) {
+		// 判断当前class是否为候选clazz
 		if (!AnnotationUtils.isCandidateClass(clazz, resourceAnnotationTypes)) {
 			return InjectionMetadata.EMPTY;
 		}
@@ -374,6 +380,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		do {
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
+			// 遍历类本地变量
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
 				if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
 					if (Modifier.isStatic(field.getModifiers())) {
@@ -387,6 +394,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					}
 					currElements.add(new EjbRefElement(field, field, null));
 				}
+				// 寻找类本地变量是否存在@Resource注解
 				else if (field.isAnnotationPresent(Resource.class)) {
 					if (Modifier.isStatic(field.getModifiers())) {
 						throw new IllegalStateException("@Resource annotation is not supported on static fields");
@@ -397,6 +405,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				}
 			});
 
+			// 遍历本地方法
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
 				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
@@ -423,6 +432,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 						currElements.add(new EjbRefElement(method, bridgedMethod, pd));
 					}
+					// 寻找本地方法是否被@Resource注解注释
 					else if (bridgedMethod.isAnnotationPresent(Resource.class)) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@Resource annotation is not supported on static methods");
@@ -440,6 +450,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			});
 
 			elements.addAll(0, currElements);
+			// 将目标类的父类赋值给当前类
 			targetClass = targetClass.getSuperclass();
 		}
 		while (targetClass != null && targetClass != Object.class);

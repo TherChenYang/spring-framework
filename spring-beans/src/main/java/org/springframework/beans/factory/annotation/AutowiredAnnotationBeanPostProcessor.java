@@ -159,6 +159,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	 */
 	@SuppressWarnings("unchecked")
 	public AutowiredAnnotationBeanPostProcessor() {
+		// 将@Autowired和@Value注解加入list
 		this.autowiredAnnotationTypes.add(Autowired.class);
 		this.autowiredAnnotationTypes.add(Value.class);
 		try {
@@ -410,7 +411,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
 		try {
-			metadata.inject(bean, beanName, pvs);
+			metadata.inject(bean, beanName, pvs); // 注入beanDefinition提前解析好的@Autowired需要的字段
 		}
 		catch (BeanCreationException ex) {
 			throw ex;
@@ -483,6 +484,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		do {
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
+			// 遍历本地变量，判断是否存在被@Autowired注解注释的类变量
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
 				MergedAnnotation<?> ann = findAutowiredAnnotation(field);
 				if (ann != null) {
@@ -492,11 +494,13 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						}
 						return;
 					}
+					// 判断是否存在required标签
 					boolean required = determineRequiredStatus(ann);
 					currElements.add(new AutowiredFieldElement(field, required));
 				}
 			});
 
+			// 遍历本地方法，判断是否存在被@Autowired注解注释的本地方法
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
 				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
@@ -656,13 +660,13 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			}
 			if (value != null) {
 				ReflectionUtils.makeAccessible(field);
-				field.set(bean, value);
+				field.set(bean, value); // 设置对象的对应的属性值
 			}
 		}
 
 		@Nullable
 		private Object resolveFieldValue(Field field, Object bean, @Nullable String beanName) {
-			DependencyDescriptor desc = new DependencyDescriptor(field, this.required);
+			DependencyDescriptor desc = new DependencyDescriptor(field, this.required); // 创建依赖描述符
 			desc.setContainingClass(bean.getClass());
 			Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
 			Assert.state(beanFactory != null, "No BeanFactory available");

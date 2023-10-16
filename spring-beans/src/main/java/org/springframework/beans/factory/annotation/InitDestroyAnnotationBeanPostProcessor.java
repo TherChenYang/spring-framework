@@ -148,6 +148,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		// 获取生命周期元数据
 		LifecycleMetadata metadata = findLifecycleMetadata(beanType);
+		// 修改BeanDefinition，将方法注册进入bean的定义
 		metadata.checkConfigMembers(beanDefinition);
 	}
 
@@ -219,7 +220,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	}
 
 	private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
-		if (!AnnotationUtils.isCandidateClass(clazz, Arrays.asList(this.initAnnotationType, this.destroyAnnotationType))) {
+		if (!AnnotationUtils.isCandidateClass(clazz, Arrays.asList(this.initAnnotationType, this.destroyAnnotationType))) { // 判断当前类是否为候选类(其实没有逻辑，只判断了当前注解是否是java.开头的)
 			return this.emptyLifecycleMetadata;
 		}
 
@@ -309,7 +310,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			for (LifecycleElement element : this.initMethods) {
 				String methodIdentifier = element.getIdentifier();
 				if (!beanDefinition.isExternallyManagedInitMethod(methodIdentifier)) {
-					// 注册外部管理的初始化方法
+					// 注册外部管理的初始化方法(此时修改了BeanDefinition)
 					beanDefinition.registerExternallyManagedInitMethod(methodIdentifier);
 					checkedInitMethods.add(element);
 					if (logger.isTraceEnabled()) {
@@ -321,7 +322,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			for (LifecycleElement element : this.destroyMethods) {
 				String methodIdentifier = element.getIdentifier();
 				if (!beanDefinition.isExternallyManagedDestroyMethod(methodIdentifier)) {
-					// 注册外部管理的销毁方法
+					// 注册外部管理的销毁方法(此时修改了BeanDefinition)
 					beanDefinition.registerExternallyManagedDestroyMethod(methodIdentifier);
 					checkedDestroyMethods.add(element);
 					if (logger.isTraceEnabled()) {

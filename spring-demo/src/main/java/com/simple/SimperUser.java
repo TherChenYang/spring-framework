@@ -1,5 +1,6 @@
 package com.simple;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,7 +11,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class SimperUser {
 
+	@Autowired
+	private Job job;
+
 	public void test() {
-		System.out.println("this is simpleUser");
+		System.out.println(job.getName());
 	}
 }
