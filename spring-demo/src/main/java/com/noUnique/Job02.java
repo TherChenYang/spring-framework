@@ -1,6 +1,6 @@
 package com.noUnique;
 
-import com.simple.Job;
+import com.circle.Job;
 import org.springframework.stereotype.Component;
 
 /**

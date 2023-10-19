@@ -204,6 +204,7 @@ class ConfigurationClassBeanDefinitionReader {
 		Assert.state(bean != null, "No @Bean annotation attributes");
 
 		// Consider name and any aliases
+		// 查找Bean注解是否存在name属性，如果有没有name属性，则使用方法名作为beanName
 		List<String> names = new ArrayList<>(Arrays.asList(bean.getStringArray("name")));
 		String beanName = (!names.isEmpty() ? names.remove(0) : methodName);
 
@@ -237,7 +238,10 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 		else {
 			// instance @Bean method
+			// 设置bdf的工厂bean名称，后序通过 factoryBean.factoryMethod进行调用
 			beanDef.setFactoryBeanName(configClass.getBeanName());
+			// 设置Bdf的FactoryBeanName属性，后面并不会通过构造方法实例化@Bean引入的bean
+			// 而是通过调用factoryMethod来实例化bean
 			beanDef.setUniqueFactoryMethodName(methodName);
 		}
 
@@ -251,25 +255,30 @@ class ConfigurationClassBeanDefinitionReader {
 
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(beanDef, metadata);
 
+		// 处理@Bean注解中的autowire属性
 		Autowire autowire = bean.getEnum("autowire");
 		if (autowire.isAutowire()) {
 			beanDef.setAutowireMode(autowire.value());
 		}
 
+		// 处理@Bean注解中的autowireCandidate属性
 		boolean autowireCandidate = bean.getBoolean("autowireCandidate");
 		if (!autowireCandidate) {
 			beanDef.setAutowireCandidate(false);
 		}
 
+		// 处理@Bean注解中的initMethod属性
 		String initMethodName = bean.getString("initMethod");
 		if (StringUtils.hasText(initMethodName)) {
 			beanDef.setInitMethodName(initMethodName);
 		}
 
+		// 处理@Bean注解中的destoryMethod属性
 		String destroyMethodName = bean.getString("destroyMethod");
 		beanDef.setDestroyMethodName(destroyMethodName);
 
 		// Consider scoping
+		// 如果有Scope注解，则进行Scope注解的处理工作
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
 		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(metadata, Scope.class);
 		if (attributes != null) {

@@ -313,7 +313,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (registry instanceof SingletonBeanRegistry) {
 			sbr = (SingletonBeanRegistry) registry;
 			if (!this.localBeanNameGeneratorSet) {
-				// 是否有自定义的明明生成器
+				// 是否有自定义的命名生成器
 				BeanNameGenerator generator = (BeanNameGenerator) sbr.getSingleton(
 						AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR);
 				if (generator != null) {

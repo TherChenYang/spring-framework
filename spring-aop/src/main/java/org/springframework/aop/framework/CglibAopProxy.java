@@ -286,10 +286,10 @@ class CglibAopProxy implements AopProxy, Serializable {
 		boolean isFrozen = this.advised.isFrozen();
 		boolean exposeProxy = this.advised.isExposeProxy();
 		boolean isStatic = this.advised.getTargetSource().isStatic();
-
+		// 生成调用AOP方法时的Callback方法
 		// Choose an "aop" interceptor (used for AOP calls).
 		Callback aopInterceptor = new DynamicAdvisedInterceptor(this.advised);
-
+		// 用于非切面的方法
 		// Choose a "straight to target" interceptor. (used for calls that are
 		// unadvised but can return this). May be required to expose the proxy.
 		Callback targetInterceptor;

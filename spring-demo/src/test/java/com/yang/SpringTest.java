@@ -1,15 +1,16 @@
 package com.yang;
 
+import com.beanAnnotation.SimpleBean;
+import com.circle.SimperUser;
+import com.circle.SpringAopConfig;
 import com.common.Account;
 import com.construct.Report;
-import com.factoryBean.CustomFactoryBean;
 import com.factoryBean.CustomSmartFactoryBean;
 import com.importRegister.config.SpringConfiguration;
 import com.importRegister.domain.User;
 import com.importRegister.im.UserImported;
 import com.importRegister.sel.CustomClass;
-import com.simple.Job;
-import com.simple.SimperUser;
+import com.circle.Job;
 import com.sub.event.CustomEvent;
 import com.sub.source.CustomEventSource;
 import com.yang.domain.Person;
@@ -129,13 +130,14 @@ public class SpringTest {
 		System.out.println(bean);
 	}
 
-	/**
+	/*
 	 * 测试循环依赖
 	 */
 	@Test
 	public void test10() {
-		ApplicationContext ac = new AnnotationConfigApplicationContext("com.simple");
+		ApplicationContext ac = new AnnotationConfigApplicationContext(SpringAopConfig.class);
 		SimperUser bean = ac.getBean(SimperUser.class);
+		Job job = bean.getJob();
 		bean.test();
 	}
 
@@ -147,6 +149,16 @@ public class SpringTest {
 		ApplicationContext ac = new AnnotationConfigApplicationContext("com.noUnique");
 		Object job = ac.getBean(Job.class);
 		System.out.println(job);
+	}
+
+	/**
+	 * 测试@Bean注解注入的bean是否遵循springBean的生命周期
+	 */
+	@Test
+	public void test12() {
+		ApplicationContext ac = new AnnotationConfigApplicationContext("com.beanAnnotation");
+		SimpleBean bean = ac.getBean(SimpleBean.class);
+		bean.test();
 	}
 
 }

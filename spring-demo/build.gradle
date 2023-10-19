@@ -18,6 +18,7 @@ dependencies {
 	implementation(project(":spring-webmvc"))
 	implementation(project(":spring-jdbc"))
 	implementation(project(":spring-orm"))
+	implementation(project(":spring-aop"))
 	implementation(project(":spring-tx"))
 	implementation(project(":spring-web"))
 	implementation(project(":spring-context-indexer"))

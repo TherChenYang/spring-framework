@@ -437,6 +437,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		Object result = existingBean;
+		// 遍历BeanPostProcessor进行方法调用
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
 			Object current = processor.postProcessBeforeInitialization(result, beanName);
 			if (current == null) {
@@ -618,6 +619,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					// 因为冻结指的是在实例化之前不能再修改BeanDefinition细腻，这里已经完成对象实例化
 					// 只是对BeanDefinition信息进行一些补充，不会影响到已经实例化的对象，所以可以在此对BeanDefinition信息进行修改
 					// MergedBeanDefinitionPostProcessor后置处理器修改合并bean的定义
+					// 在这里解析@Autowired注解，@Resource注解，@PostConstruct注解等等
 					applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
 				}
 				catch (Throwable ex) {
@@ -640,6 +642,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 			// 不管是否需要创建代理类，都将匿名内部类放入三级缓存中
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
+			// 尝试直接放入二级缓存能否解决循环依赖问题
+//			addEarlySingletonObject(beanName, bean);
 		}
 
 		// Initialize the bean instance.
@@ -648,6 +652,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		try {
 			// 完成属性填充工作
 			populateBean(beanName, mbd, instanceWrapper);
+			// 执行初始化工作
+			// 在Aop模式中，非代理方法的callBack中封装了提前暴露的bean
+			// 所以在此处对原始bean的属性修改动作，在代理bean中也能获取到对应的属性
+			// StaticUnadvisedInterceptor此拦截器callback中封装了提前暴露的bean
+			// 当调用代理bean的get方法时，其实走到了拦截器方法，拦截器方法增强了get方法，调用的是提前暴露的bean的get方法
+			// 所以会发现原始bean的属性修改之后，在代理bean中也能发现对应的属性修改
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -659,8 +669,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						mbd.getResourceDescription(), beanName, "Initialization of bean failed", ex);
 			}
 		}
-		// 是否提前暴露单例
+
+		// 是否提前暴露单例(有可能在别的bean注入的时候已经完成了当前bean对应的代理工作，此处进行获取然后完成替换工作)
 		if (earlySingletonExposure) {
+			// 此时如果再其他地方创建代理，二级缓存将不为空，因为调用了三级缓存中的getObject方法，创建代理后
+			// 删除了三级缓存，并将代理bean放入了二级缓存
 			Object earlySingletonReference = getSingleton(beanName, false);
 			if (earlySingletonReference != null) {
 				if (exposedObject == bean) {
@@ -688,6 +701,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Register bean as disposable.
+		// 销毁的时候用
 		try {
 			registerDisposableBeanIfNecessary(beanName, bean, mbd);
 		}
@@ -1459,6 +1473,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {
 				// 调用InstantiationAwareBeanPostProcessor实例化后的方法postProcessAfterInstantiation
+				// 此时如果返回false，可以直接中止后续的值处理工作，防止后续的属性填充覆盖此时的处理
 				if (!bp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
 					return;
 				}
@@ -1494,7 +1509,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				pvs = mbd.getPropertyValues();
 			}
 			for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {
-				PropertyValues pvsToUse = bp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName); // 在这里完成@Autowired的注入以及处理其余的properties
+				// 在这里完成@Autowired，@Resource的注入以及处理其余的properties
+				PropertyValues pvsToUse = bp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
 				if (pvsToUse == null) {
 					if (filteredPds == null) {
 						filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
@@ -1516,6 +1532,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		if (pvs != null) {
+			// 填充pvs属性
 			applyPropertyValues(beanName, mbd, bw, pvs);
 		}
 	}
@@ -1864,18 +1881,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}, getAccessControlContext());
 		}
 		else {
-			// 执行aware方法，填充aware属性
+			// 执行aware方法，填充aware属性，BeanNameAware，BeanClassLoaderAware， BeanFactoryAware
+			// 其余的aware在BeanPostProcessor中进行填充
 			invokeAwareMethods(beanName, bean);
 		}
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
-			// BeanPostProcessor前置
+			// BeanPostProcessor前置方法执行(@PostConstruct在此执行-InitDestroyAnnotationBeanPostProcessor)
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
+
 		try {
-			// 执行init方法
+			// 执行init-method方法方法
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
 		catch (Throwable ex) {
@@ -1884,7 +1903,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
-			// BeanPostProcessor后置
+			// BeanPostProcessor后置方法执行
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 
@@ -1940,6 +1959,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 			else {
+				// 调用实现了InitializingBean的afterPropertiesSet方法
 				((InitializingBean) bean).afterPropertiesSet();
 			}
 		}

@@ -1,4 +1,4 @@
-package com.simple;
+package com.circle;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,5 +16,13 @@ public class SimperUser {
 
 	public void test() {
 		System.out.println(job.getName());
+	}
+
+	public Job getJob() {
+		return job;
+	}
+
+	public void setJob(Job job) {
+		this.job = job;
 	}
 }
