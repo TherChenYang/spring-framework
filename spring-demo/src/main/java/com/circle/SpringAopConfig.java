@@ -1,8 +1,6 @@
 package com.circle;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.*;
 
 /**
  * @author: CY.Ma
@@ -13,4 +11,17 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableAspectJAutoProxy
 @ComponentScan(basePackages = {"com.circle"})
 public class SpringAopConfig {
+
+	@Bean
+	public SimpleBean simpleBean() {
+		return new SimpleBean();
+	}
+
+//	@Bean
+	public SimpleUserB b() {
+		SimpleBean simpleBean = this.simpleBean();
+		SimpleBean simpleBean1 = this.simpleBean();
+		System.out.println(simpleBean1 == simpleBean);
+		return new SimpleUserB();
+	}
 }

@@ -1,9 +1,12 @@
 package com.yang;
 
+import com.aop.AopConfig;
+import com.aop.AopUserService;
 import com.beanAnnotation.SimpleBean;
 import com.circle.SimperUser;
 import com.circle.SpringAopConfig;
 import com.common.Account;
+import com.configProxy.SpringProxyConfig;
 import com.construct.Report;
 import com.factoryBean.CustomSmartFactoryBean;
 import com.importRegister.config.SpringConfiguration;
@@ -11,6 +14,7 @@ import com.importRegister.domain.User;
 import com.importRegister.im.UserImported;
 import com.importRegister.sel.CustomClass;
 import com.circle.Job;
+import com.property.SpringPropertyConfig;
 import com.sub.event.CustomEvent;
 import com.sub.source.CustomEventSource;
 import com.yang.domain.Person;
@@ -20,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 
 /**
  * @author: CY.Ma
@@ -159,6 +165,33 @@ public class SpringTest {
 		ApplicationContext ac = new AnnotationConfigApplicationContext("com.beanAnnotation");
 		SimpleBean bean = ac.getBean(SimpleBean.class);
 		bean.test();
+	}
+
+	/**
+	 * 测试enhancer增强过的Configuration
+	 */
+	@Test
+	public void test13() {
+		ApplicationContext ac = new AnnotationConfigApplicationContext(SpringProxyConfig.class);
+		SpringProxyConfig bean = ac.getBean(SpringProxyConfig.class);
+		bean.test();
+	}
+
+	@Test
+ 	public void test14() {
+		ApplicationContext ac = new AnnotationConfigApplicationContext(AopConfig.class);
+		AopUserService bean = ac.getBean(AopUserService.class);
+		bean.saveUser();
+	}
+
+	/**
+	 * 测试propertySource和placeholder解析
+	 */
+	@Test
+	public void test15() {
+		ApplicationContext ac = new AnnotationConfigApplicationContext(SpringPropertyConfig.class);
+		JdbcTemplate bean = ac.getBean(JdbcTemplate.class);
+		System.out.println(bean);
 	}
 
 }

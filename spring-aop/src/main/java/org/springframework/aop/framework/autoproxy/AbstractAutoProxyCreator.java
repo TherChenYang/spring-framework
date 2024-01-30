@@ -141,6 +141,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<>(16);
 
+	// 是否是代理的bean bean -> boolean
 	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<>(256);
 
 
@@ -246,18 +247,24 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
-		Object cacheKey = getCacheKey(beanClass, beanName);
+		Object cacheKey = getCacheKey(beanClass, beanName); // 检查是否为factoryBean，如果是，则补充&前缀
 
 		if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
-			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
+			// shouldSkip方法比较核心
+			// 有时候如果不debug进入方法，必须注意类的实现类，可能调用链路中调用的是该类的实现类，而不是他本身
+			// 调用链路 AspectJAwareAdvisorAutoProxyCreator.shouldSkip -> AnnotationAwareAspectJAutoProxyCreator.findCandidateAdvisors
+			// -> BeanFactoryAspectJAdvisorsBuilder.buildAspectJAdvisors
+			// 在进入findCandidateAdvisors方法后，会遍历工厂中所有的类型为Object的name，然后获取class判断是否存在@Aspect注解
+			// 这时候会解析所有的@Aspect并放在advisorsCache中
+			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) { // 判断是否为基础设施bean
 				this.advisedBeans.put(cacheKey, Boolean.FALSE);
 				return null;
 			}
 		}
-
+		// 如果有自定的TargetSourceCreator 在这里创建
 		// Create proxy here if we have a custom TargetSource.
 		// Suppresses unnecessary default instantiation of the target bean:
 		// The TargetSource will handle target instances in a custom fashion.
@@ -287,6 +294,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	@Override
 	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
+		// bean后置处理器
+		// 所有的bean初始化之后都会进入此方法
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
 			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
@@ -337,7 +346,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			return bean;
 		}
 
-		// Create proxy if we have advice.
+		// Create proxy if we have advice. // 寻找拦截器链
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);

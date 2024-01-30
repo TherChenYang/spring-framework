@@ -932,6 +932,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Trigger initialization of all non-lazy singleton beans...
 		// 触发所有非延迟加载单例bean的初始化，遍历集合对象
+		// BeanPostProcessor不在这里实例化，在refresh方法中的前置方法中已经完成实例化
 		for (String beanName : beanNames) {
 			// 合并父类BeanDefinition
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);

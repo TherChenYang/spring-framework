@@ -632,7 +632,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware.
-		// 单例 && 允许循环依赖 && 当前bean正在创建中
+		// 单例 && 允许循环依赖 && 当前bean正在创建中(在getBean时将beanName填充进入singletonsCurrentlyInCreation)
 		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
 				isSingletonCurrentlyInCreation(beanName));
 		if (earlySingletonExposure) {
@@ -673,7 +673,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// 是否提前暴露单例(有可能在别的bean注入的时候已经完成了当前bean对应的代理工作，此处进行获取然后完成替换工作)
 		if (earlySingletonExposure) {
 			// 此时如果再其他地方创建代理，二级缓存将不为空，因为调用了三级缓存中的getObject方法，创建代理后
-			// 删除了三级缓存，并将代理bean放入了二级缓存
+			// 删除了三级缓存，并将代理bean放入了二级缓存(当 allowEarlyReference为false时，只存一级二级缓存中取，不考虑三级缓存singletonFactories)
 			Object earlySingletonReference = getSingleton(beanName, false);
 			if (earlySingletonReference != null) {
 				if (exposedObject == bean) {
@@ -1184,7 +1184,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					// 应用InstantiationAwareBeanPostProcessor接口的postProcessBeforeInstantiation方法
 					bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
 					if (bean != null) {
-						// 应用InstantiationAwareBeanPostProcessor接口的postProcessAfterInstantiation方法
+						// 应用InstantiationAwareBeanPostProcessor接口的postProcessAfterInitialization方法
 						bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 					}
 				}

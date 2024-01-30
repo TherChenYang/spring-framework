@@ -215,7 +215,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 								singletonObject = singletonFactory.getObject();
 								// 二级缓存中存入对象
 								this.earlySingletonObjects.put(beanName, singletonObject);
-								// 三级缓存中删除对线
+								// 三级缓存中删除对象
 								this.singletonFactories.remove(beanName);
 							}
 						}

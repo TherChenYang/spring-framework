@@ -34,6 +34,7 @@ dependencies {
 	implementation(project(":spring-websocket"))
 	implementation("org.aspectj:aspectjweaver:1.9.6")
 	implementation(project(":spring-aop"))
+	implementation('mysql:mysql-connector-java:8.0.28')
 }
 
 tasks.test {

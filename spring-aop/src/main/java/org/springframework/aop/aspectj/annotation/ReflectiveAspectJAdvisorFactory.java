@@ -71,17 +71,17 @@ import org.springframework.util.comparator.InstanceComparator;
 @SuppressWarnings("serial")
 public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFactory implements Serializable {
 
-	// Exclude @Pointcut methods
+	// Exclude @Pointcut methods 排除 @Pointcut修饰的方法
 	private static final MethodFilter adviceMethodFilter = ReflectionUtils.USER_DECLARED_METHODS
 			.and(method -> (AnnotationUtils.getAnnotation(method, Pointcut.class) == null));
 
 	private static final Comparator<Method> adviceMethodComparator;
 
 	static {
-		// Note: although @After is ordered before @AfterReturning and @AfterThrowing,
-		// an @After advice method will actually be invoked after @AfterReturning and
-		// @AfterThrowing methods due to the fact that AspectJAfterAdvice.invoke(MethodInvocation)
-		// invokes proceed() in a `try` block and only invokes the @After advice method
+		// Note: although @After is ordered before @AfterReturning and @AfterThrowing, 虽然@After的顺序是在AfterReturning和AfterThrowing之前
+		// an @After advice method will actually be invoked after @AfterReturning and，实际上After通知方法将在AfterReturning和AfterThrowing之后执行，
+		// @AfterThrowing methods due to the fact that AspectJAfterAdvice.invoke(MethodInvocation)，因为在AspectJAfterAdvice.invoke方法中
+		// invokes proceed() in a `try` block and only invokes the @After advice method，在try方法中执行proceed()，并且在相应的finally块中执行@After通知方法
 		// in a corresponding `finally` block.
 		Comparator<Method> adviceKindComparator = new ConvertingComparator<>(
 				new InstanceComparator<>(
@@ -89,9 +89,9 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				(Converter<Method, Annotation>) method -> {
 					AspectJAnnotation<?> ann = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
 					return (ann != null ? ann.getAnnotation() : null);
-				});
-		Comparator<Method> methodNameComparator = new ConvertingComparator<>(Method::getName);
-		adviceMethodComparator = adviceKindComparator.thenComparing(methodNameComparator);
+				}); // 通知类型转换比较器
+		Comparator<Method> methodNameComparator = new ConvertingComparator<>(Method::getName); // 方法名转换比较器
+		adviceMethodComparator = adviceKindComparator.thenComparing(methodNameComparator); // 先比较通知优先级，优先级相同的情况下比较method名称
 	}
 
 
@@ -132,7 +132,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				new LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
 
 		List<Advisor> advisors = new ArrayList<>();
-		for (Method method : getAdvisorMethods(aspectClass)) {
+		for (Method method : getAdvisorMethods(aspectClass)) { // 这里会拿到所有非@PointCut修饰的方法
 			// Prior to Spring Framework 5.2.7, advisors.size() was supplied as the declarationOrderInAspect
 			// to getAdvisor(...) to represent the "current position" in the declared methods list.
 			// However, since Java 7 the "current position" is not valid since the JDK no longer
@@ -203,13 +203,13 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			int declarationOrderInAspect, String aspectName) {
 
 		validate(aspectInstanceFactory.getAspectMetadata().getAspectClass());
-
+		// 判断方法上是否存在pointcut属性
 		AspectJExpressionPointcut expressionPointcut = getPointcut(
 				candidateAdviceMethod, aspectInstanceFactory.getAspectMetadata().getAspectClass());
 		if (expressionPointcut == null) {
 			return null;
 		}
-
+		// 根据方法，类，pintCut返回一个Advisor的实例
 		return new InstantiationModelAwarePointcutAdvisorImpl(expressionPointcut, candidateAdviceMethod,
 				this, aspectInstanceFactory, declarationOrderInAspect, aspectName);
 	}
@@ -217,7 +217,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	@Nullable
 	private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
 		AspectJAnnotation<?> aspectJAnnotation =
-				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
+				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod); // 判断方法是否被Aop通知注解注释
 		if (aspectJAnnotation == null) {
 			return null;
 		}

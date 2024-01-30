@@ -16,4 +16,7 @@ public class LogUtil {
         System.out.println("执行打印日志的功能!");
     }
 
+	public void test() {
+		System.out.println("test");
+	}
 }
